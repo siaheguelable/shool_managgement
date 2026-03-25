@@ -7,9 +7,8 @@ const staffAdminSchema = new mongoose.Schema(
     email: { type: String, unique: true },
     password: { type: String },
     role: { type: String, default: "staff_admin" },
-    githubId: { type: String, unique: true }, // store GitHub id
   },
-  { timestamps: true, collection: "staff_admins" }
+  { timestamps: true, collection: "staff_admins_v2" } // changed collection name
 );
 
 const staffAdminModels = mongoose.model("StaffAdmin", staffAdminSchema);

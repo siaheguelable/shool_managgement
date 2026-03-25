@@ -16,11 +16,11 @@ exports.getStaffAdmins = async (req, res) => {
 exports.createStaffAdmin= async (req, res) => {
   try {
     const newUser = new userModel(req.body);
-   // const errors = validateUser(newUser);
-    //if (errors.length > 0) {
-     // return res.status(400).json({ message: "Validation errors", errors });
-    //}
-    //await newUser.save();
+    const errors = validateUser(newUser);
+    if (errors.length > 0) {
+      return res.status(400).json({ message: "Validation errors", errors });
+    }
+    await newUser.save();
     res
       .status(201)
       .json({ message: "User created successfully", data: newUser });

@@ -2,8 +2,8 @@
 exports.validateUser = (user) => {
   const errors = [];
 
-  if (!user.name || typeof user.name !== 'string') {
-    errors.push({ field: 'name', message: 'Name is required and must be a string.' });
+  if (!user.username || typeof user.username !== 'string') {
+    errors.push({ field: 'username', message: 'Username is required and must be a string.' });
   }
 
   if (!user.email || typeof user.email !== 'string') {
