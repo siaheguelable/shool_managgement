@@ -1,30 +1,50 @@
-const userModel = require("../models/staffAdminModels.js");
-const { validateUser } = require("../validation/userValidation");
+const StaffAdmin = require("../models/staffAdminModels.js");
+const { validateUser} = require("../validation/userValidation");
+const bcrypt = require("bcryptjs");
 
-
-// Get all staff admins (API)
-exports.getStaffAdmins = async (req, res) => {
+// Create a new staff admin
+const createStaffAdmin = async (req, res) => {
   try {
-    const staffAdmins = await userModel.find();
-    res.status(200).json({ message: "Staff admins retrieved", data: staffAdmins });
-  } catch (error) {
-    res.status(500).json({ message: "Error retrieving staff admins", error });
-  }
-};
+    const { email, password, confirmPassword } = req.body;
 
-// Create a new user  (API)
-exports.createStaffAdmin= async (req, res) => {
-  try {
-    const newUser = new userModel(req.body);
-    const errors = validateUser(newUser);
-    if (errors.length > 0) {
-      return res.status(400).json({ message: "Validation errors", errors });
+    // Validate input
+    const { isValid, errors } = validateUser({ email, password, confirmPassword });
+    if (!isValid) {
+      return res.status(400).json({ success: false, errors });
     }
-    await newUser.save();
-    res
-      .status(201)
-      .json({ message: "User created successfully", data: newUser });
-  } catch (error) {
-    res.status(500).json({ message: "Error creating user", error });
+
+    // Check if email already exists
+    const existingAdmin = await StaffAdmin.findOne({ email });
+    if (existingAdmin) {
+      return res.status(400).json({ success: false, message: "Email already exists." });
+    }
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create new staff admin
+    const newAdmin = new StaffAdmin({
+      email,
+      password: hashedPassword,
+      confirmPassword: hashedPassword, // Store hashed confirmPassword for consistency
+    });
+
+    await newAdmin.save();
+    res.status(201).json({ success: true, message: "Staff admin created successfully." });
+  } catch (err) {
+    console.error("Error creating staff admin:", err);
+    res.status(500).json({ success: false, message: "Server error." });
   }
 };
+// get all staff admins
+const getAllStaffAdmins = async (req, res) => {
+  try {
+    const staffAdmins = await StaffAdmin.find();
+    res.status(200).json({ success: true, data: staffAdmins });
+  } catch (err) {
+    console.error("Error fetching staff admins:", err);
+    res.status(500).json({ success: false, message: "Server error." });
+  }
+};
+
+module.exports = { createStaffAdmin, getAllStaffAdmins };

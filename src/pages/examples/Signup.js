@@ -4,13 +4,49 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleLeft, faEnvelope, faUnlockAlt } from "@fortawesome/free-solid-svg-icons";
 import { faFacebookF, faGithub, faTwitter } from "@fortawesome/free-brands-svg-icons";
 import { Col, Row, Form, Card, Button, FormCheck, Container, InputGroup } from '@themesberg/react-bootstrap';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
+
 
 import { Routes } from "../../routes";
 import BgImage from "../../assets/img/illustrations/signin.svg";
 
 
-export default () => {
+const Signup = () =>  {
+  const history = useHistory();
+  const  [formData, setFormData] = React.useState({
+    email: "",
+    password: "",
+    confirmPassword: "",
+    terms: false,
+  });
+   
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    const response = await fetch("http://localhost:3000/api/staff-admins", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Signup failed");
+    }
+
+    console.log("Success:", data);
+    alert("Form submitted successfully!");
+    history.push("/examples/sign-in");
+
+  } catch (error) {
+    console.error("Error:", error);
+    alert(error.message || "Failed to submit form");
+  }
+};
   return (
     <main>
       <section className="d-flex align-items-center my-5 mt-lg-6 mb-lg-5">
@@ -26,15 +62,17 @@ export default () => {
                 <div className="text-center text-md-center mb-4 mt-md-0">
                   <h3 className="mb-0">Create an account</h3>
                 </div>
-                <Form className="mt-4">
+                <Form className="mt-4" onSubmit={handleSubmit}>
                   <Form.Group id="email" className="mb-4">
                     <Form.Label>Your Email</Form.Label>
                     <InputGroup>
                       <InputGroup.Text>
                         <FontAwesomeIcon icon={faEnvelope} />
                       </InputGroup.Text>
-                      <Form.Control autoFocus required type="email" placeholder="example@company.com" />
+                      <Form.Control autoFocus required type="email" placeholder="example@company.com"
+                      value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
                     </InputGroup>
+                    
                   </Form.Group>
                   <Form.Group id="password" className="mb-4">
                     <Form.Label>Your Password</Form.Label>
@@ -42,7 +80,8 @@ export default () => {
                       <InputGroup.Text>
                         <FontAwesomeIcon icon={faUnlockAlt} />
                       </InputGroup.Text>
-                      <Form.Control required type="password" placeholder="Password" />
+                      <Form.Control required type="password" placeholder="Password" 
+                      value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} />
                     </InputGroup>
                   </Form.Group>
                   <Form.Group id="confirmPassword" className="mb-4">
@@ -51,7 +90,8 @@ export default () => {
                       <InputGroup.Text>
                         <FontAwesomeIcon icon={faUnlockAlt} />
                       </InputGroup.Text>
-                      <Form.Control required type="password" placeholder="Confirm Password" />
+                      <Form.Control required type="password" placeholder="Confirm Password" 
+                      value={formData.confirmPassword} onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })} />
                     </InputGroup>
                   </Form.Group>
                   <FormCheck type="checkbox" className="d-flex mb-4">
@@ -96,3 +136,4 @@ export default () => {
     </main>
   );
 };
+export default Signup;
